@@ -1,5 +1,33 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/_SPFabricCore.scss';
 
+.questions{
+  .container{
+    display: grid;
+    grid-template-columns: 50px 50px 50px 50px;
+    grid-template-rows: auto;
+    grid-column-gap: 1px;
+    grid-row-gap: 1px;
+    align-items: start;
+    justify-items: start;
+  }
+  .item {
+    background-color: #444;
+    color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    font-size: 150%;
+  }
+  .item1{
+    grid-column-start: 1;
+  }
+  .item2{
+    grid-column-start: 2;
+  }
+  .item3{
+    grid-column-start: 3;
+  }
+}
+
 .helloWorld {
   .container {
     max-width: 700px;

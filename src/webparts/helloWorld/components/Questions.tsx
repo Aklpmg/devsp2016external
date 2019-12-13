@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './HelloWorld.module.scss';
+import styles from './Main.module.scss';
 import { IQuestionsProps } from './IQuestionsProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
@@ -39,11 +39,13 @@ export default class Questions extends React.Component < IQuestionsProps, {} > {
 
   public render(): React.ReactElement<IQuestionsProps> {
     const qComponent = data.map((item, key) =>
-        <Question key={item.Id} id={item.Id} title={item.Title}></Question>
+        <Question key={item.Id} id={item.Id} title={item.Title} value={item.Value} comments={item.Comments} response={item.Response} link1={item.Link1} link2={item.Link2}></Question>
     );
     return(
-     <div>
-       {qComponent}
+     <div className={styles.questions}>
+       <div className={styles.container}>
+        {qComponent}
+       </div>
      </div>
     );
   }
