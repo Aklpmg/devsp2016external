@@ -3,7 +3,7 @@ import styles from './HelloWorld.module.scss';
 import { IHelloWorldProps } from './IHelloWorldProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
-import Questions from './Questions';
+import { Questions } from './Questions';
 
 export default class HelloWorld extends React.Component < IHelloWorldProps, {} > {
   public render(): React.ReactElement<IHelloWorldProps> {
