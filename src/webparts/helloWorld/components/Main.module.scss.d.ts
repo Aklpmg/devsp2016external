@@ -2,6 +2,7 @@
 // Please do not change this file!
 interface CssExports {
   'button': string;
+  'col': string;
   'column': string;
   'container': string;
   'description': string;
@@ -10,9 +11,12 @@ interface CssExports {
   'item1': string;
   'item2': string;
   'item3': string;
+  'item4': string;
+  'item5': string;
   'label': string;
   'ms-Grid': string;
   'questions': string;
+  'questions1': string;
   'row': string;
   'subTitle': string;
   'title': string;
