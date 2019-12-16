@@ -8,7 +8,6 @@ import { Question } from './Question';
 import { data } from './questionsdata';
 
 import { makeData } from './makeData';
-import { FilePicker } from 'react-file-picker'
 
 import Dropzone from 'react-dropzone'
 import { useDropzone } from 'react-dropzone'
@@ -185,16 +184,7 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     <div className={styles.questions}>
       <MyDropzone/>
       <input type='file'/>
-      <FilePicker
-        extensions={['txt']}
-        onChange = { FileObject => console.log(FileObject) }
-        onError = { errMsg => console.log(errMsg) }
-      >
-        <button>
-          Click to upload 
-        </button>
-      </FilePicker>
-
+      
       <div className={styles.container}>
           {items.map(item => (
             <Question handleChange={handleValueChange} handleFiles={handleFilesUpload}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './Main.module.scss';
 import { IQuestionProps, IQuestionState } from './IQuestionProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react/lib/FilePicker';
+
 import { useDropzone } from 'react-dropzone'
 import { sp } from '@pnp/sp';
 
