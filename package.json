@@ -26,8 +26,11 @@
     "office-ui-fabric-react": "^7.5.3",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+<<<<<<< HEAD
     "react-dropzone": "^10.2.1",
     "react-file-picker": "0.0.6",
+=======
+>>>>>>> 3ea42f6c8f1544e298e7a2ef975391febfeeda46
     "react-table": "^7.0.0-rc.10"
   },
   "devDependencies": {
