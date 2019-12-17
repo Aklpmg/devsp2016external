@@ -14,8 +14,10 @@ interface CssExports {
   'item3': string;
   'item4': string;
   'item5': string;
+  'itemall': string;
   'label': string;
   'ms-Grid': string;
+  'parent': string;
   'questions': string;
   'row': string;
   'subTitle': string;

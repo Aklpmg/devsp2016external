@@ -5,78 +5,74 @@ import { escape } from '@microsoft/sp-lodash-subset';
 
 import { sp } from '@pnp/sp';
 import { Dropdown, DropdownMenuItemType, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
-
+import { TextField } from 'office-ui-fabric-react/lib/TextField';
+import { Link } from 'office-ui-fabric-react/lib/Link';
 // import { ItemsContext } from './Questions';
 //  re-render
 
-export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, handleFiles, id, etag, title, description, value, response, comments, sectionL1, sectionL2, sectionL3, docCount, docFolderLink }) => {
+interface IDropdownControlledExampleState {
+  selectedItem?: { key: string | number | undefined };
+}
+
+export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, handleDropdownChange, handleIsDirty, id, title, description, value, response, comments, docCount, docFolderLink, hasValue, hasDocument }) => {
   // check props have changed before re-rendering
   // const [items, setItems] = React.useContext(ItemsContext)
 
   // the inputs are controlled so they are synced with the state!
-  
-  const onHandleFiles = (files: any) => {
-    // will receive all of the files - why not just create the contol in here
-    // call the parent with an array of files? plus the questionId and sectionL values .... if I know the questionId, why not just look up the other values from the parent!
-    //  do the section level values even need to be passed into here?
-    console.log('Question | onHandleFiles');
-    handleFiles(id, files);
-  };
-
   const click = (e: any) => {
     console.log('docFolderLink: ', docFolderLink);
   };
 
-  const setFile = (files: any) => {
-    handleFiles(1, files);
+  const _valueChange = (e: React.FormEvent<HTMLInputElement>, newValue?: string) => {
+    const ele: any = e.target;
+    // console.log(ele.dataset);
+    handleChange(id, ele.dataset.field, newValue);
   };
 
-  const onFileUpload = (file: any) => {
-    console.log('onFileUpload');
-    console.log(file);
+  const _dropdownChange = (e: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
+    // console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
+    const ele: any = e.target;
+    // console.log(`child dropdownChange: ${id} | ${ele.dataset.field} | ${item.text}`);
+    handleDropdownChange(id, ele.dataset.field, item.text);
   };
 
-interface IDropdownControlledExampleState {
-    selectedItem?: { key: string | number | undefined };
-  }
-  
-  const _onChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
-    console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
-    console.log(item.data);
-    handleChange(id, 'Response', item.text);    
-    
+  const _isDirty = (e: any) => {
+    handleIsDirty(id);
   };
 
   return(
     <React.Fragment>
       <div className={styles.item1}>
-        {id} | {title}
+        {id} | {description}
       </div>
       <div className={styles.item2}>
-        <input type='text' data-id={id} name='Value' value={value} onChange={onHandleChange} onBlur={onHandleBlur}/>
+        {hasValue &&
+          <TextField data-id={id} data-field='value' value={value} onChange={_valueChange} onBlur={_isDirty}/>
+        }
       </div>
       <div className={styles.item3}>
-        <Dropdown                
+        <Dropdown
           data-id = {id}
-          data-name = 'Response'          
-          onChange={_onChange}
-          placeholder="Select an option"
+          data-field = 'response'
+          defaultSelectedKey = {response}
+          onChange = {_dropdownChange}
+          placeholder = 'Select an option'
           options={[
             { key: 'Comments added', text: 'Comments added' },
             { key: 'Relevant information attached', text: 'Relevant information attached' },
             { key: 'Relevant information to be provided via email', text: 'Relevant information to be provided via email' },
             { key: 'KPMG to obtain from my accounting software', text: 'KPMG to obtain from my accounting software' },
             { key: 'Not applicable', text: 'Not applicable' }
-          ]}          
+          ]}
         />
       </div>
       <div className={styles.item4}>
-        <textarea data-id={id} name='Comments' value={comments} onChange={onHandleChange} onBlur={onHandleBlur}/>
+        <TextField data-id={id} data-field='comments' value={comments} onChange={_valueChange} onBlur={_isDirty} multiline rows={2} autoAdjustHeight/>
       </div>
       <div className={styles.item5}>
         {docCount}
         {docFolderLink &&
-          <a href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</a>
+          <Link href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</Link>
         }
       </div>
     </React.Fragment>
@@ -84,7 +80,7 @@ interface IDropdownControlledExampleState {
 };
 
 // <ChildFilesDropZone questionId={id} sectionL1={sectionL1} sectionL2={sectionL2} sectionL3={sectionL3}/>
-
+// <a href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</a>
 /*
 {docCount}
         {docFolderLink &&
