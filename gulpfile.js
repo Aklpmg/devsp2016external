@@ -1,7 +1,7 @@
 const {src, dest, watch} = require('gulp');
 
-// const wp = 'wp5latest';
-const wp = 'mywp1latest';
+const wp = 'wp5latest';
+// const wp = 'mywp1latest';
 
 function copyLocalizedResources() {
     return src(`../${wp}/src/webparts/**/loc/*.d.ts`)

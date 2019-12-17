@@ -4,56 +4,17 @@ import { IQuestionProps, IQuestionState } from './IQuestionProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
 import { sp } from '@pnp/sp';
+import { Dropdown, DropdownMenuItemType, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
 // import { ItemsContext } from './Questions';
 //  re-render
 
-// a separate component for each Question - takes in QuestionId as a parameter plus other values? - required for uploading the document?
-//  or should it call it's parent function to do the actual uploading?  call the parent function with the File object?
-// todo: remove/delete a document
-/*
-<ul>
-        {currentFiles && currentFiles.map(file => (
-          <li>file.name</li>
-        ))}
-      </ul>
-*/
-
 export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, handleFiles, id, etag, title, description, value, response, comments, sectionL1, sectionL2, sectionL3, docCount, docFolderLink }) => {
   // check props have changed before re-rendering
-  // link to the file by the unique document id? how to get this back? else if i change the filename?
-  //    warnings - if the file already exists - or just rename it ?  send a notification to ... kpmg person?
-
-  // handleChange - needs to know which column?
-  // value
-  // response
-  // upload file - what should this do exactly? - in here, an upload file control will actually upload the file
-  // and then it needs to tell the parent it has done this - put it somewhere tmpStorage?
-  // flow: if attachFile link exists then move the file from tmpStorage to the right place
-  // but if in the parent - as it is items, as soon as this changes .... all of the children will re-render?
-  // unless I tell it not to - or unless it is a performance issue!  I can still compare the props coming in and if it hasn't changed for this one
-
   // const [items, setItems] = React.useContext(ItemsContext)
 
   // the inputs are controlled so they are synced with the state!
-  const onHandleChange = (e: any) => {
-    console.log('Question - handleChange');
-    // console.log(e.target.name);
-    // console.log(e.target.value);
-    // console.log(e.target.dataset.id);
-    handleChange(id, e.target.name, e.target.value);
-    // console.log(items);
-  };
-
-  const onHandleBlur = (e: any) => {
-    console.log('Question - onHandleBlur');
-    console.log(e.target.name);
-    console.log(e.target.value);
-    // console.log(e.target.dataset.id);
-    // I should save this control
-   // console.log(items);
-  };
-
+  
   const onHandleFiles = (files: any) => {
     // will receive all of the files - why not just create the contol in here
     // call the parent with an array of files? plus the questionId and sectionL values .... if I know the questionId, why not just look up the other values from the parent!
@@ -75,6 +36,17 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
     console.log(file);
   };
 
+interface IDropdownControlledExampleState {
+    selectedItem?: { key: string | number | undefined };
+  }
+  
+  const _onChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
+    console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
+    console.log(item.data);
+    handleChange(id, 'Response', item.text);    
+    
+  };
+
   return(
     <React.Fragment>
       <div className={styles.item1}>
@@ -84,14 +56,19 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
         <input type='text' data-id={id} name='Value' value={value} onChange={onHandleChange} onBlur={onHandleBlur}/>
       </div>
       <div className={styles.item3}>
-        <select onChange={onHandleChange} name='Response'>
-          <option value=''></option>
-          <option value='Comments added'>Comments Added</option>
-          <option value='Relevant information attached'>Relevant information attached</option>
-          <option value='Relevant information to be provided via email'>Relevant information to be provided via email</option>
-          <option value='KPMG to obtain from my accounting software'>KPMG to obtain from my accounting software</option>
-          <option value='Not applicable'>Not applicable</option>
-        </select>
+        <Dropdown                
+          data-id = {id}
+          data-name = 'Response'          
+          onChange={_onChange}
+          placeholder="Select an option"
+          options={[
+            { key: 'Comments added', text: 'Comments added' },
+            { key: 'Relevant information attached', text: 'Relevant information attached' },
+            { key: 'Relevant information to be provided via email', text: 'Relevant information to be provided via email' },
+            { key: 'KPMG to obtain from my accounting software', text: 'KPMG to obtain from my accounting software' },
+            { key: 'Not applicable', text: 'Not applicable' }
+          ]}          
+        />
       </div>
       <div className={styles.item4}>
         <textarea data-id={id} name='Comments' value={comments} onChange={onHandleChange} onBlur={onHandleBlur}/>
@@ -161,4 +138,36 @@ export default class Question extends React.Component < IQuestionProps, IQuestio
     );
   }
 }
+
+        <select onChange={onHandleChange} name='Response'>
+          <option value=''></option>
+          <option value='Comments added'>Comments Added</option>
+          <option value='Relevant information attached'>Relevant information attached</option>
+          <option value='Relevant information to be provided via email'>Relevant information to be provided via email</option>
+          <option value='KPMG to obtain from my accounting software'>KPMG to obtain from my accounting software</option>
+          <option value='Not applicable'>Not applicable</option>
+        </select>
+
+        const onHandleChange = (e: any) => {
+    console.log('Question - handleChange');
+    // console.log(e.target.name);
+    // console.log(e.target.value);
+    // console.log(e.target.dataset.id);
+    handleChange(id, e.target.name, e.target.value);
+    // console.log(items);
+  };
+
+  const onHandleBlur = (e: any) => {
+    console.log('Question - onHandleBlur');
+    console.log(e.target.name);
+    console.log(e.target.value);
+    // console.log(e.target.dataset.id);
+    // I should save this control
+   // console.log(items);
+  };
+<ul>
+        {currentFiles && currentFiles.map(file => (
+          <li>file.name</li>
+        ))}
+      </ul>
 */

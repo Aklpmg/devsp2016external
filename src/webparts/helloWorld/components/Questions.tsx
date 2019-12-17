@@ -104,11 +104,13 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
   */
   const handleValueChange = (id, name, value) => {
     console.log('parent - handleValueChange');
-    console.log(items);
-    // console.log(id, name, value);
+    console.log(items); 
+    console.log(id, name, value);
+    console.log(items[0]);
     // as soon as I update the state - all of the children will re-render!
     const nextState = items.map(a => a.Id === id ? { ...a, [name]: value } : a);
     setItems(nextState);
+    console.log(nextState[0]);
     // updateQuestionComponent(nextState);
   };
 
@@ -166,7 +168,7 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 
   React.useEffect(() => {
     // when the component first loads, do what?  take the data and do what with it?  should only run this once!
-    fetchItems();  
+    fetchItems();
     // updateQuestionComponent(data);
   }, []);
 
@@ -213,7 +215,7 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
   const [showModal, setShowModal] = React.useState(false);
   const clickme = (e) => {
     console.log('clickme');
-    //setHide(false);
+    // setHide(false);
     // setShowModal(true);
     // const dia: IFrameDialog = new IFrameDialog('http://www.google.com');
     // console.log(dia);
@@ -223,8 +225,7 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
             dialog.show().then(() => {
               // Dialog.alert(`Message from Custom Dailog-->`);
             });
-            */
-    
+            */    
     // Dialog.alert('Hello world');
     // Dialog.alert('1');
     console.log(2);
