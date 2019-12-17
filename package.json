@@ -26,7 +26,8 @@
     "office-ui-fabric-react": "^7.5.3",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-dropzone": "^10.2.1"
+    "react-dropzone": "^10.2.1",
+    "react-file-upload": "0.0.4"
   },
   "devDependencies": {
     "@microsoft/loader-load-themed-styles": "^1.7.160",

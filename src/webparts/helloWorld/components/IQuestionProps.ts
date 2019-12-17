@@ -1,18 +1,19 @@
 export interface IQuestionProps {
   handleChange: any;
   handleFiles: any;
-  id: number;  
+  clickme: any;
+  id: number;
+  etag?: string;
   title: string;
-  description: string;  
+  description: string;
   value?: string;
   response?: string;
-  comments?: string;  
-  link1?: string;
-  link2?: string;
-  currentFiles?: any;
+  comments?: string;
   sectionL1?: string;
   sectionL2?: string;
   sectionL3?: string;
+  docCount?: number;
+  docFolderLink?: any;
 }
 
 export interface IQuestionState {

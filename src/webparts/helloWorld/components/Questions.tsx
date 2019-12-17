@@ -13,6 +13,8 @@ import Dropzone from 'react-dropzone'
 import { useDropzone } from 'react-dropzone'
 
 // Assume only one user at a time filling out the form!
+// But each time I update a listItem, the etag value will change! 
+//  after each update will need to retrieve the etag value again! and update the state!
 
 /*
   // When our cell renderer calls updateMyData, we'll use
@@ -66,25 +68,44 @@ function MyDropzone() {
   )
 }
 
-// export const ItemsContext = React.createContext()
+interface IItem {
+  Id: number,
+  Etag: string,
+  Title: string,
+  Description: string,
+  Value: string,
+  Response: string,
+  Comments: string,
+  SectionL1: string,
+  SectionL2: string,
+  SectionL3: string,    
+  DocCount: number,
+  DocFolderLink: string
+}
+
+// export const ItemsContext = React.createContext({})
+
 export const Questions: React.FC<IQuestionsProps> = (props) => {
   const [items, setItems] = React.useState([]);
   const [qComp, setQComp] = React.useState();
 
-
   ///*
   const fetchItems = async () => {
+    console.log('fetchItems');
     // get all the items from a sharepoint list
     //const response = await sp.web.lists.getByTitle('Questions').items.select('Title','Value','Response','Comments','L1','L2','L3','Link1','Link2').get().then(function(data) {
-      const response = await sp.web.lists.getByTitle('Questions').items.select('Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','Link1','Link2').get().then(function(data) {
-      let items: Array<object> = [];
+      const response = await sp.web.lists.getByTitle('Questions').items.select('Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','DocFolderLink').get().then(function(data) {
+      let items: IItem[] = [];
       console.log(data);
       // format of files - a collection of links else cannot delete them!  store as json?  but then can't just look at the list
       //  a custom field control
-      for (let k in data) {        
-        let item = data[k];        
+      for (let k in data) {
+        let item = data[k];
+        // console.log(item['odata.etag']);
+        // console.log(item.DocIds);
         items.push({
           Id: item.Id,
+          Etag: item['odata.etag'],
           Title: item.Title,
           Description: item.QuestionDescription,
           Value: item.Value,
@@ -92,14 +113,14 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
           Comments: item.Comments,
           SectionL1: item.SectionL1,
           SectionL2: item.SectionL2,
-          SectionL3: item.SectionL3,
-          Link1: item.Link1,
-          Link2: item.Link2,
-          Files: []
+          SectionL3: item.SectionL3,          
+          DocCount: 0,
+          DocFolderLink: item.DocFolderLink
         });
       }
       return items;
     });
+    // console.log(response);
     setItems(response);
     // const response = await get('/users');
     // setItems(response.data);
@@ -120,25 +141,57 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     // updateQuestionComponent(nextState);
   };
 
-  const handleFilesUpload = (id, files, sectionL1) => {
-    console.log('Questions | Parent - handleFilesUpload');
-    console.log(id);
-    // lookup the section level values based on the Question?
+  
+  interface Array<IItem> {
+    find(predicate: (value: IItem, index: number, obj: Array<IItem>) => boolean, thisArg?: any): IItem | undefined;
+  }
 
-    files.forEach((file) => {      
-      console.log(file.name);
-      sp.web.getFolderByServerRelativeUrl("/sites/kpoc/Docs/").files.add(file.name, file, true)
-      .then(f => {
-        f.file.getItem().then(item => {
-          console.log(item);
-          console.log(item['OData__dlc_DocId']);
-          item.update({
-              QuestionID: id,
-              SectionL1: sectionL1
-          });
-        });
-      });
-    })
+  // upload the files to the designated libary, return a list of new docIds
+  //  update the metadata 
+  //  return a list of newDocIds
+  // vs just add as attachments, flow to do all of this?
+  async function dbProcessFiles(id, files, sectionL1) {
+    console.log('dbProcessFiles Start');
+    let colDocIds:string[] = [];
+        
+    for (let index = 0; index < files.length; index++) {      
+      const file = files[index];
+      console.log('file start: ', file.name);
+      const f = await sp.web.getFolderByServerRelativeUrl("/sites/kpoc/Docs/").files.add(file.name, file, true);      
+      const item = await f.file.getItem();
+      const newDocId = item['OData__dlc_DocId'];      
+      colDocIds.push(newDocId);
+
+      await item.update({
+        QuestionID: id,
+        SectionL1: sectionL1
+      },'*');
+      console.log('file end: ', file.name);
+    }    
+    console.log('dbProcessFiles End');
+    return colDocIds;
+  }
+
+  const findItem = (id: number) => {
+    const i: Array<IItem> = items;
+    return i.find(item => item.Id == id);
+  }
+
+  // upload the files then update the list item:
+  //  but still need to know the new document count of the library!??
+  const xhandleFilesUpload = async (id, files) => {
+    console.log('Questions | Parent - handleFilesUpload 1');
+    console.log(items);
+    const item = findItem(id);
+    console.log(item);    
+    const docCount = item.DocCount+1;
+    console.log(docCount);
+    // what is the new item count?
+    // console.log(newEtag);
+        
+    const nextState = items.map(a => a.Id === id ? { ...a, DocCount: docCount } : a);
+    console.log(nextState);
+    setItems(nextState);
   }
 
   React.useEffect(() => {
@@ -147,19 +200,9 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     // updateQuestionComponent(data);
   }, []);
 
-  const updateQuestionComponent = (data) => {
-    const c = data.map((item, key) =>
-      <Question handleChange={handleValueChange} handleFiles={handleFilesUpload}
-      key={item.Id} id={item.Id} title={item.Title} description={item.Description}
-      value={item.Value} comments={item.Comments} response={item.Response} link1={item.Link1} link2={item.Link2}
-      sectionL1={item.SectionL1} sectionL2={item.SectionL2} sectionL3={item.SectionL3}>
-    </Question>);
-    setQComp(c);
-  };
-
   const display = (e: any) => {
     console.log('display');
-    console.log(items);
+    console.log(items[0].DocCount);
   };
 
   const upd = (e: any) => {
@@ -180,20 +223,52 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
   // Sections - foreaqch Section, get the list of questions and display under a Heading - do the questions need a sectionLevel id value?  
   //    questions should only show up under their lowest section level 
 
+  const clickme = async (e) => {
+    console.log('clickme async');    
+    console.log(items);
+
+    const id = 1;
+    const item = findItem(id);
+    console.log(item);
+    let cnt = item.DocCount+1;
+    console.log(cnt);
+    // what is the new item count?
+    // console.log(newEtag);
+        
+    const nextState = items.map(a => a.Id === id ? { ...a, DocCount: cnt } : a);
+    console.log(nextState);
+    setItems(nextState);
+  }
+
+  // hmm when it opens up the dialog box!??
+  const handleFilesUpload = async (id, files) => {
+    console.log('Questions | Parent - handleFilesUpload 3');
+    console.log(files);    
+    console.log('id: ', id);
+    const item = findItem(id);
+//    console.log(item);
+    const docCount = item.DocCount+1;
+    console.log('docCount: ', docCount);
+    // what is the new item count?
+    // console.log(newEtag);
+        
+    const nextState = items.map(a => a.Id === id ? { ...a, DocCount: docCount } : a);
+    console.log(nextState);
+    setItems(nextState);
+  }
+
   return(
-    <div className={styles.questions}>
-      <MyDropzone/>
-      <input type='file'/>
-      
-      <div className={styles.container}>
-          {items.map(item => (
-            <Question handleChange={handleValueChange} handleFiles={handleFilesUpload}
-            key={item.Id} id={item.Id} title={item.Title} description={item.Descripiton}
-            value={item.Value} comments={item.Comments} response={item.Response} link1={item.Link1} link2={item.Link2} currentFiles={item.Files}
-            sectionL1={item.SectionL1} sectionL2={item.SectionL2} sectionL3={item.SectionL3}>
-            </Question>
-          ))}
-      </div>
+    <div className={styles.questions}>      
+        <div className={styles.container}>
+            {items.map(item => (
+              <Question handleChange={handleValueChange} handleFiles={handleFilesUpload} clickme={clickme} etag={item.Etag}
+              key={item.Id} id={item.Id} title={item.Title} description={item.Descripiton}
+              value={item.Value} comments={item.Comments} response={item.Response}
+              sectionL1={item.SectionL1} sectionL2={item.SectionL2} sectionL3={item.SectionL3}
+              docCount={item.DocCount} docFolderLink={item.DocFolderLink}>
+              </Question>
+            ))}
+        </div>      
     </div>
    );
 };
@@ -206,3 +281,25 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 interface IReactGetItemsState{
   items: [];
 }
+
+/*
+const updItem = await sp.web.lists.getByTitle('questions').items.getById(id).update({  
+      'DocIds': docIds
+    }, '*');
+    const newEtag = updItem.data["odata.etag"];
+
+      const updateQuestionComponent = (data) => {
+    const c = data.map((item, key) =>
+      <Question handleChange={handleValueChange} handleFiles={handleFilesUpload} etag={item.Etag}
+      key={item.Id} id={item.Id} title={item.Title} description={item.Description}
+      value={item.Value} comments={item.Comments} response={item.Response} 
+      sectionL1={item.SectionL1} sectionL2={item.SectionL2} sectionL3={item.SectionL3}
+      docCount={item.DocCount}>
+    </Question>);
+    setQComp(c);
+  };
+
+  <button onClick={display}>disp</button>
+      <MyDropzone/>
+      <input type='file'/>     
+*/
