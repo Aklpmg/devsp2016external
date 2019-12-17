@@ -3,6 +3,7 @@
 interface CssExports {
   'button': string;
   'col': string;
+  'col1': string;
   'column': string;
   'container': string;
   'description': string;
@@ -16,10 +17,11 @@ interface CssExports {
   'label': string;
   'ms-Grid': string;
   'questions': string;
-  'questions1': string;
   'row': string;
   'subTitle': string;
   'title': string;
+  'xquestions': string;
+  'xxquestions': string;
 }
 declare var cssExports: CssExports;
 export = cssExports;

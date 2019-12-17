@@ -3,9 +3,7 @@ import styles from './Main.module.scss';
 import { IQuestionProps, IQuestionState } from './IQuestionProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
-import { useDropzone } from 'react-dropzone';
 import { sp } from '@pnp/sp';
-import { FileUpload } from 'react-file-upload';
 
 // import { ItemsContext } from './Questions';
 //  re-render
@@ -13,67 +11,6 @@ import { FileUpload } from 'react-file-upload';
 // a separate component for each Question - takes in QuestionId as a parameter plus other values? - required for uploading the document?
 //  or should it call it's parent function to do the actual uploading?  call the parent function with the File object?
 // todo: remove/delete a document
-interface IChildDropZoneProps {
-  questionId: number;
-  sectionL1?: string;
-  sectionL2?: string;
-  sectionL3?: string;
-}
-
-// todo: if the document has the same name and goes against another question, the document will be overwritten!
-// move the data calls ....
-const ChildFilesDropZone: React.FC<IChildDropZoneProps> = ({ questionId, sectionL1, sectionL2, sectionL3 }) => {
-  // upload the document straight away vs saving the info for use later
-  //  size of the document - if quite big then storing it locally first?
-  const onDrop = React.useCallback((acceptedFiles) => {
-    acceptedFiles.forEach((file) => {
-      console.log('ChildFilesDropZone - files | file: ');
-      console.log(file.name);
-      sp.web.getFolderByServerRelativeUrl("/sites/kpoc/Docs/").files.add(file.name, file, true)
-      .then(f => {
-        f.file.getItem().then(item => {
-          item.update({
-              QuestionID: questionId,
-              SectionL1: sectionL1
-          });
-        });
-      });
-    })
-  }, [])
-
-  const {getRootProps, getInputProps} = useDropzone({onDrop});
-
-  return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      <p>ChildFilesDropZone - display the filenames after upload ...</p>
-    </div>
-  )
-}
-
-interface IParentDropZoneProps {
-  handleFiles: any;
-  currentFiles?: any;
-}
-
-// DocId, FileName(ext), url
-// upload plus display - or 2 separate controls?
-// after the files have been uploaded ... display the current fileNames
-const ParentFilesDropZone: React.FC<IParentDropZoneProps> = ({ handleFiles }) => {
-  // what is being passed back to the parent? the files only
-  const onDrop = React.useCallback((acceptedFiles) => {
-    handleFiles(acceptedFiles);
-  }, [])
-
-  const {getRootProps, getInputProps} = useDropzone({ onDrop });
-
-  return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      <p>add documents</p>      
-    </div>
-  )
-}
 /*
 <ul>
         {currentFiles && currentFiles.map(file => (
@@ -82,7 +19,7 @@ const ParentFilesDropZone: React.FC<IParentDropZoneProps> = ({ handleFiles }) =>
       </ul>
 */
 
-export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, handleFiles, id, etag, title, description, value, response, comments, sectionL1, sectionL2, sectionL3, docCount, docFolderLink}) => {
+export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, handleFiles, id, etag, title, description, value, response, comments, sectionL1, sectionL2, sectionL3, docCount, docFolderLink }) => {
   // check props have changed before re-rendering
   // link to the file by the unique document id? how to get this back? else if i change the filename?
   //    warnings - if the file already exists - or just rename it ?  send a notification to ... kpmg person?
@@ -98,13 +35,23 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
 
   // const [items, setItems] = React.useContext(ItemsContext)
 
+  // the inputs are controlled so they are synced with the state!
   const onHandleChange = (e: any) => {
-     console.log('Question - handleChange');
+    console.log('Question - handleChange');
     // console.log(e.target.name);
     // console.log(e.target.value);
     // console.log(e.target.dataset.id);
     handleChange(id, e.target.name, e.target.value);
     // console.log(items);
+  };
+
+  const onHandleBlur = (e: any) => {
+    console.log('Question - onHandleBlur');
+    console.log(e.target.name);
+    console.log(e.target.value);
+    // console.log(e.target.dataset.id);
+    // I should save this control
+   // console.log(items);
   };
 
   const onHandleFiles = (files: any) => {
@@ -121,43 +68,55 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
 
   const setFile = (files: any) => {
     handleFiles(1, files);
-  }
+  };
 
   const onFileUpload = (file: any) => {
     console.log('onFileUpload');
     console.log(file);
-  }
+  };
 
   return(
-    <div className={styles.row}>      
-      <div className={styles.col}>
+    <React.Fragment>
+      <div className={styles.item1}>
         {id} | {title}
       </div>
-      <div className={styles.col}>
-        <input type='text' data-id={id} name='Value' value={value} onChange={onHandleChange}/>        
+      <div className={styles.item2}>
+        <input type='text' data-id={id} name='Value' value={value} onChange={onHandleChange} onBlur={onHandleBlur}/>
       </div>
-      <div className={styles.col}>
-        <input type='text' data-id={id} name='Response' value={response} onChange={onHandleChange}/>
+      <div className={styles.item3}>
+        <select onChange={onHandleChange} name='Response'>
+          <option value=''></option>
+          <option value='Comments added'>Comments Added</option>
+          <option value='Relevant information attached'>Relevant information attached</option>
+          <option value='Relevant information to be provided via email'>Relevant information to be provided via email</option>
+          <option value='KPMG to obtain from my accounting software'>KPMG to obtain from my accounting software</option>
+          <option value='Not applicable'>Not applicable</option>
+        </select>
       </div>
-      <div className={styles.col}>
-        comments: {comments}
+      <div className={styles.item4}>
+        <textarea data-id={id} name='Comments' value={comments} onChange={onHandleChange} onBlur={onHandleBlur}/>
       </div>
-      <div className={styles.col}>
+      <div className={styles.item5}>
         {docCount}
         {docFolderLink &&
-          <a href={docFolderLink.Url} target='_blank'  data-interception='off'  rel='noopener noreferrer'>upload files</a>
+          <a href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</a>
         }
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
 // <ChildFilesDropZone questionId={id} sectionL1={sectionL1} sectionL2={sectionL2} sectionL3={sectionL3}/>
 
 /*
+{docCount}
+        {docFolderLink &&
+          <a href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</a>
+        }
+
 <input type="file" name="file" multiple onChange={(e) => setFile(e.target.files)} />
-  <button onClick={click}>clickme</button>       
-  <ParentFilesDropZone handleFiles={onHandleFiles}/> 
+  <button onClick={click}>clickme</button>
+  <ParentFilesDropZone handleFiles={onHandleFiles}/>
 
 export default class Question extends React.Component < IQuestionProps, IQuestionState > {
   public constructor(props: IQuestionProps, state: IQuestionState) {

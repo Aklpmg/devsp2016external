@@ -1,6 +1,6 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/_SPFabricCore.scss';
 
-.questions{
+.xquestions{
   .container{
     display: relative;    
     justify-content: center;
@@ -17,10 +17,14 @@
   }
   .col{
     display: flex;
-    flex-direction: column;
-    flex-basis: 100%;
-    flex: 1;
+    flex-direction: column;    
+    flex: 1 1 auto;
   }
+  .col1{
+    @extend .col;
+    flex-grow: 2
+  }
+
   .item1{
     display: flex;
     flex-direction: column;
@@ -42,15 +46,50 @@
   }
 }
 
-.questions1{
+.xxquestions{
+  .container{
+    display: block;
+  }
+
+  .item{
+    width:20%;    
+  }
+  .item1{
+    @extend .item;
+  }
+  .item2{
+    @extend .item;
+  }
+  .item3{
+    @extend .item;
+  }
+  .item4{
+    @extend .item;
+  }
+  .item5{
+    @extend .item;
+  }
+}
+
+.questions{
+  display: block;
+  width: 100%;
+  // background-color: orange;
   .container{
     display: grid;
-    grid-template-columns: 350px 50px 150px 150px 50px;
-    grid-template-rows: auto;
-    grid-column-gap: 1px;
-    grid-row-gap: 1px;
-    align-items: start;
-    justify-items: start;
+    // grid-template-columns: 150px 50px 150px 150px 50px;
+    // desc value response comments uploadDoc
+    grid-template-columns: 35% 10% 25% 20% 10%;
+    // grid-template-rows: repeat(auto-fill, 100%);
+    // grid-template-rows: 100%;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    // align-items: start;
+    // justify-items: start;
+  }
+  input, select, textarea {
+    max-width: 100%;
+    width: 100%;
   }
   .item {
     zbackground-color: #444;
@@ -60,9 +99,11 @@
   }
   .item1{
     grid-column-start: 1; // title
+    // background-color: aqua;
   }
   .item2{
     grid-column-start: 2; // value
+    // background-color: aqua;
   }
   .item3{
     grid-column-start: 3; // response

@@ -36,7 +36,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '8a1476ac-4e19-44a5-a46d-627f5e8cfa7a',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 3,
     'Title': 'Profit & Loss for the period 1 January 2020 to 31 December 2020',
     'Value': null,
@@ -53,7 +53,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '06e6be5a-b1b6-473b-863c-11ab978c73d8',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 4,
     'Title': 'Trial Balance as at 31 December 2020',
     'Value': null,
@@ -70,7 +70,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': 'a4032a46-f46d-4d1a-a1ab-2ecf1134ec1e',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 5,
     'Title': 'Balance Sheet movements report as at 31 December 2020',
     'Value': null,
@@ -104,7 +104,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': 'c3befd3a-4c76-4b27-ad25-9d796001779e',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 7,
     'Title': 'Please confirm that all transactions for the period ended 31 December 2020 have been processed in your accounting software and we can rely on these balances.',
     'Value': null,
@@ -121,7 +121,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '3215bf26-e445-46a9-932d-aab0ae046623',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 8,
     'Title': 'Please provide us with a backup of your accounting system',
     'Value': null,
@@ -138,7 +138,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '633ca28d-1d5c-4610-b93f-22eeb0850a73',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 9,
     'Title': 'Excel copy of the detailed trial balances, including both profit and loss and balance sheet items at 31 December 2020',
     'Value': null,
@@ -155,7 +155,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '5cda6afe-877e-402c-b50f-e9352086d9c1',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 10,
     'Title': 'Transaction listing of any foreign exchange gain/loss accounts for the period (needed for the cashflow statement)',
     'Value': null,
@@ -172,7 +172,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '2ad9c8a4-edaa-4387-bebc-5f2b53c53f71',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 11,
     'Title': 'Split of revenue items (if not included in the Trial Balance)',
     'Value': null,
@@ -189,7 +189,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '814f6b81-ab03-4305-bb2a-fa156b0399e9',
-    'odata.etag': '\'7\'',    
+    'odata.etag': '\'7\'',
     'Id': 12,
     'Title': 'Copies of the latest filed tax returns/statements',
     'Value': null,
@@ -206,7 +206,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': 'cb4b96f6-0bcc-4327-8a07-219ef855b6c5',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 13,
     'Title': 'Copies of bank statements for all of your accounts showing the closing balances as at 31 December 2020',
     'Value': null,
@@ -223,7 +223,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': '5c87df40-832e-4165-9355-d884b51eba2c',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 14,
     'Title': 'Copies of credit card statements for all of your accounts showing the closing balance as at 31 December 2020',
     'Value': null,
@@ -240,7 +240,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': 'b57a34b2-29f3-463c-b7dc-26d18895595c',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 15,
     'Title': 'Confirmation of the balance of any cash on hand as at 31 December 2020',
     'Value': null,
@@ -257,7 +257,7 @@ export const data = [
   {
     'odata.type': 'SP.Data.QuestionsListItem',
     'odata.id': 'f112755f-69ad-4ad2-8a77-2016e6062917',
-    'odata.etag': '\'8\'',    
+    'odata.etag': '\'8\'',
     'Id': 16,
     'Title': 'Statements for all term deposit accounts showing the closing balance, interest rate and maturity date applicable as at 31 December 2020',
     'Value': null,
