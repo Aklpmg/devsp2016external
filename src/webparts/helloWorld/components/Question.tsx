@@ -69,11 +69,11 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
       <div className={styles.item4}>
         <TextField data-id={id} data-field='comments' value={comments} onChange={_valueChange} onBlur={_isDirty} multiline rows={2} autoAdjustHeight/>
       </div>
-      <div className={styles.item5}>
-        {docCount}
+      <div className={styles.item5}>        
         {docFolderLink &&
           <Link href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</Link>
         }
+        {docCount > 0 && <span> ({docCount})</span>}
       </div>
     </React.Fragment>
   );

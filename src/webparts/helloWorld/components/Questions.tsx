@@ -29,11 +29,12 @@ interface IItem {
   sectionL1: string;
   sectionL2: string;
   sectionL3: string;
-  docCount: number;
-  docFolderLink: string;
+  docCount?: number;
+  docFolderLink?: string;
+  docFolderId?: number;
   hasValue: boolean;
   hasDocument: boolean;
-  isDirty: boolean;
+  isDirty: boolean;  
 }
 
 // export const ItemsContext = React.createContext({})
@@ -42,13 +43,17 @@ interface Array<IItem> {
   map(predicate: (value: IItem, index: number, obj: Array<IItem>) => IItem): Array<IItem>;
 }
 
-export const Questions: React.FC<IQuestionsProps> = (props) => {
-  type MyType = Array<IItem>;
-
+export const Questions: React.FC<IQuestionsProps> = (props) => {  
   const [items, setItems] = React.useState<IItem[]>([]);
-  const [qComp, setQComp] = React.useState();
-  const selectFields: string[] = ['Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','DocFolderLink','hasValue','hasDocument'];
-  // /*
+
+  const selectFields: string[] = ['DocFolderID', 'Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','DocFolderLink','hasValue','hasDocument'];
+
+  const fetchDocumentCount = async (docFolderLink: any) => {
+    const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');  //todo:
+    const dataitem = await sp.web.getFolderByServerRelativeUrl(docFolderUrl).select('ItemCount').get()
+    return dataitem.ItemCount;
+  }
+
   const fetchItems = async () => {
     console.log('fetchItems');
     // const items = new Array<IItem>();
@@ -57,22 +62,30 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     const data = await sp.web.lists.getByTitle('Questions').items.select(selectFields.join(',')).get();
     // console.log(data);
     for (const k in data) {
-      const item = data[k];
+      const dataitem = data[k];
+      let docCount = 0;
+      
+      // todo: 
+      if (dataitem.hasDocument && dataitem.DocFolderLink !== null && dataitem.DocFolderLink.Url){        
+        docCount = await fetchDocumentCount(dataitem.DocFolderLink);        
+      }
+
       items.push({
-        id: item.Id,
-        etag: item['odata.etag'],
-        title: item.Title,
-        description: item.QuestionDescription,
-        value: item.Value,
-        response: item.Response,
-        comments: item.Comments,
-        sectionL1: item.SectionL1,
-        sectionL2: item.SectionL2,
-        sectionL3: item.SectionL3,
-        docCount: 0,
-        docFolderLink: item.DocFolderLink,
-        hasValue: item.hasValue,
-        hasDocument: item.hasDocument,
+        id: dataitem.Id,
+        etag: dataitem['odata.etag'],
+        title: dataitem.Title,
+        description: dataitem.QuestionDescription,
+        value: dataitem.Value,
+        response: dataitem.Response,
+        comments: dataitem.Comments,
+        sectionL1: dataitem.SectionL1,
+        sectionL2: dataitem.SectionL2,
+        sectionL3: dataitem.SectionL3,
+        docCount: docCount,
+        docFolderLink: dataitem.DocFolderLink,
+        docFolderId: dataitem.DocFolderID,
+        hasValue: dataitem.hasValue,
+        hasDocument: dataitem.hasDocument,
         isDirty: false
       });
     }
@@ -184,6 +197,7 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 
   // Sections - foreaqch Section, get the list of questions and display under a Heading - do the questions need a sectionLevel id value?
   //    questions should only show up under their lowest section level
+  
   return(
     <div className={styles.questions}>
        <DefaultButton text='Save' onClick={handleSave}/>
@@ -227,6 +241,12 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 
   % complete
 
+  State Issues:
+    getDocCount - as it is an array (if the previous object hasn't updated yet, and then the new array-sets the original item as is, and then updates the new one)
+  
+  Async calls for each item - docCount? - state issues? but why? if the previous setState on the item hasn't run? or user experience if looks like no docs and go into the library
+    but the initial is all at once and then go and ... but I am constantly regenerating the state array for each item!!! vs batch all the calls and then update the result in one go!
+
   Generation:
     folders: properties
     list: default folder values
@@ -246,6 +266,45 @@ interface IReactGetItemsState {
 }
 
 /*
+
+
+  // get the folder item? do I have the folderItemID?
+  const fetchDocumentsCount = async (items: IItem[]) => {    
+    //filter on the items with a folder:
+    const filtered = items.filter((item, idx)=> item.docFolderId !== null && item.docFolderId !== -1)
+    console.log('fetchDocumentsCount');
+    console.log(filtered);
+
+    for (const k in filtered) {
+      const item = filtered[k];
+      const docFolderId = item.docFolderId; //check if this exists first
+      const docFolderLink: any = item.docFolderLink;
+      // console.log('docFolderId: ', docFolderId);
+      const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');
+      // console.log(docFolderUrl);
+      
+      //const data = await sp.web.lists.getByTitle('Docs').items.select('Id','Title','ItemChildCount').getById(docFolderId).get();
+      //console.log(data);
+
+      // get a specific item by id
+      sp.web.lists.getByTitle("Docs").items.select('Id','ItemChildCount','ItemCount').getById(docFolderId).get().then((item: any) => {
+        // console.log('item');
+        // console.log(item);
+      });
+      
+      sp.web.getFolderByServerRelativeUrl(docFolderUrl)
+      .select('ID','ItemChildCount','ItemCount')
+      .get().then(function(data) {
+        console.log(docFolderId);
+        console.log(data.ItemCount);
+        //console.log(`${docFolderId} | ${data.ItemCount}`);
+        const nextState = items.map(a => a.id === item.id ? { ...a, docCount: data.ItemCount } : a);
+        setItems(nextState);
+        console.log(nextState[0]);
+      }); // why is the state being reset?  is it not fast enough?  if the next item, then return the firstItem as is - add the whole item to the state!    
+    }    
+  }
+
 const updItem = await sp.web.lists.getByTitle('questions').items.getById(id).update({
       'DocIds': docIds
     }, '*');
