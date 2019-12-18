@@ -219,6 +219,8 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 /*
   Load/Filter questions by section
 
+  Ordering
+
   DataHelper functions:
     service/mockdata
     onLoad convert data types: from null to empty string, etc ...
