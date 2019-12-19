@@ -218,14 +218,14 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
   //   how to do each section separately?
 
   const questionComponent = (item: IItem) => {
-    return 
+    return
     <Question handleChange={handleValueChange} handleDropdownChange={handleDropdownChange} handleIsDirty={handleIsDirty} clickme={clickme}
     key={item.id} id={item.id} title={item.title} description={item.description}
     value={item.value} comments={item.comments} response={item.response}
     docCount={item.docCount} docFolderLink={item.docFolderLink}
     hasValue={item.hasValue} hasDocument={item.hasDocument}>
-    </Question>
-  }
+    </Question>;
+  };
 
   return(
     <div className={styles.questions}>
@@ -246,24 +246,10 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
               ))}
             </div>
           </div>
-        ))}        
+        ))}
     </div>
    );
 };
-
-interface ISectionProps {
-
-}
-
-// pass in the filtered items:
-export const Section: React.FC<ISectionProps> = (props) => {
-
-  return(
-    <React.Fragment>
-
-    </React.Fragment>
-  )
-}
 
 /*
   Load/Filter questions by section
