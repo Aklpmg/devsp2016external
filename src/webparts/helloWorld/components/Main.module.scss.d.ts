@@ -8,6 +8,7 @@ interface CssExports {
   'container': string;
   'description': string;
   'helloWorld': string;
+  'highlight': string;
   'item': string;
   'item1': string;
   'item2': string;
@@ -20,6 +21,7 @@ interface CssExports {
   'parent': string;
   'questions': string;
   'row': string;
+  'section': string;
   'subTitle': string;
   'title': string;
   'xquestions': string;

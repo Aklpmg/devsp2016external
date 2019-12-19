@@ -1,10 +1,12 @@
 import * as React from 'react';
 import styles from './Main.module.scss';
+import * as DOMPurify from 'dompurify'; // https://github.com/cure53/DOMPurify
 import { IQuestionsProps } from './IQuestionsProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 
 import { sp } from '@pnp/sp';
 import { DefaultButton, PrimaryButton, Stack, IStackTokens } from 'office-ui-fabric-react';
+
 import { Question } from './Question';
 import { data } from './questionsdata';
 
@@ -34,7 +36,7 @@ interface IItem {
   docFolderId?: number;
   hasValue: boolean;
   hasDocument: boolean;
-  isDirty: boolean;  
+  isDirty: boolean;
 }
 
 // export const ItemsContext = React.createContext({})
@@ -43,19 +45,27 @@ interface Array<IItem> {
   map(predicate: (value: IItem, index: number, obj: Array<IItem>) => IItem): Array<IItem>;
 }
 
-export const Questions: React.FC<IQuestionsProps> = (props) => {  
+// the level 2s but it depends on what the L1 is  ie if level1 is Assets & Liabilities ie L1 Id
+const SectionL1 = ['Financial Information','Client Details','Assets and Liabilities','Income and Expenses','Other']
+const SectionL2_1 = ['',''];  // ordered
+const SectionL2_2 = ['',''];
+const SectionL2_3 = ['Bank','Debtors','Livestock'];
+const SectionL2_4 = ['',''];
+const SectionL2_5 = ['',''];
+
+export const Questions: React.FC<IQuestionsProps> = (props) => {
   const [items, setItems] = React.useState<IItem[]>([]);
 
   const selectFields: string[] = ['DocFolderID', 'Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','DocFolderLink','hasValue','hasDocument'];
 
   const fetchDocumentCount = async (docFolderLink: any) => {
-    const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');  //todo:
-    const dataitem = await sp.web.getFolderByServerRelativeUrl(docFolderUrl).select('ItemCount').get()
+    const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');  // todo:
+    const dataitem = await sp.web.getFolderByServerRelativeUrl(docFolderUrl).select('ItemCount').get();
     return dataitem.ItemCount;
-  }
+  };
 
   const fetchItems = async () => {
-    console.log('fetchItems');
+    console.log('fetchItems');    
     // const items = new Array<IItem>();
     const items: IItem[] = [];
     // get all the items from a sharepoint list
@@ -64,17 +74,23 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     for (const k in data) {
       const dataitem = data[k];
       let docCount = 0;
-      
-      // todo: 
-      if (dataitem.hasDocument && dataitem.DocFolderLink !== null && dataitem.DocFolderLink.Url){        
-        docCount = await fetchDocumentCount(dataitem.DocFolderLink);        
+
+      // todo:
+      if (dataitem.hasDocument && dataitem.DocFolderLink !== null && dataitem.DocFolderLink.Url) {
+        docCount = await fetchDocumentCount(dataitem.DocFolderLink);
       }
 
+      // sanitize the html from the description field first
+      // extend the existing array of attributes
+      var desc = DOMPurify.sanitize(dataitem.QuestionDescription, {ADD_ATTR: ['target']});
+      // const desc = DOMPurify.sanitize(dataitem.QuestionDescription);      
+      
       items.push({
         id: dataitem.Id,
         etag: dataitem['odata.etag'],
         title: dataitem.Title,
-        description: dataitem.QuestionDescription,
+        description: desc,   // dataitem.QuestionDescription,
+        // description: dataitem.QuestionDescription,
         value: dataitem.Value,
         response: dataitem.Response,
         comments: dataitem.Comments,
@@ -197,24 +213,57 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 
   // Sections - foreaqch Section, get the list of questions and display under a Heading - do the questions need a sectionLevel id value?
   //    questions should only show up under their lowest section level
-  
+  // const SectionL1 = ['Financial Information','Client Details','Assets and Liabilities','Income and Expenses','Other']
+  // const SectionL2_3 = ['Bank','Debtors','Livestock'];  do I need an array of array items?
+  //   how to do each section separately?
+
+  const questionComponent = (item: IItem) => {
+    return 
+    <Question handleChange={handleValueChange} handleDropdownChange={handleDropdownChange} handleIsDirty={handleIsDirty} clickme={clickme}
+    key={item.id} id={item.id} title={item.title} description={item.description}
+    value={item.value} comments={item.comments} response={item.response}
+    docCount={item.docCount} docFolderLink={item.docFolderLink}
+    hasValue={item.hasValue} hasDocument={item.hasDocument}>
+    </Question>
+  }
+
   return(
     <div className={styles.questions}>
        <DefaultButton text='Save' onClick={handleSave}/>
         <button onClick={clickme}>clickme</button>
-        <div className={styles.container}>
-            {items.map(item => (
+        {SectionL2_3.map(sectionl2 => (
+          <div className={styles.section}>
+            <h3>{sectionl2}</h3>
+            <div className={styles.highlight}> Please provide us with the following </div>
+              <div className={styles.container}>
+              {items.filter(i => i.sectionL2 === sectionl2).map(item => (
               <Question handleChange={handleValueChange} handleDropdownChange={handleDropdownChange} handleIsDirty={handleIsDirty} clickme={clickme}
               key={item.id} id={item.id} title={item.title} description={item.description}
               value={item.value} comments={item.comments} response={item.response}
               docCount={item.docCount} docFolderLink={item.docFolderLink}
               hasValue={item.hasValue} hasDocument={item.hasDocument}>
               </Question>
-            ))}
-        </div>
+              ))}
+            </div>
+          </div>
+        ))}        
     </div>
    );
 };
+
+interface ISectionProps {
+
+}
+
+// pass in the filtered items:
+export const Section: React.FC<ISectionProps> = (props) => {
+
+  return(
+    <React.Fragment>
+
+    </React.Fragment>
+  )
+}
 
 /*
   Load/Filter questions by section
@@ -239,13 +288,13 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
   Save - if onblur is too slow > sets isDirty (last field might not get updated):
     compare original to current state to determine which items need to be updated
 
-  Link to document eg bloodstock vs open folder and description - fill in document?  
+  Link to document eg bloodstock vs open folder and description - fill in document?
 
   % complete
 
   State Issues:
     getDocCount - as it is an array (if the previous object hasn't updated yet, and then the new array-sets the original item as is, and then updates the new one)
-  
+
   Async calls for each item - docCount? - state issues? but why? if the previous setState on the item hasn't run? or user experience if looks like no docs and go into the library
     but the initial is all at once and then go and ... but I am constantly regenerating the state array for each item!!! vs batch all the calls and then update the result in one go!
 
@@ -268,10 +317,8 @@ interface IReactGetItemsState {
 }
 
 /*
-
-
   // get the folder item? do I have the folderItemID?
-  const fetchDocumentsCount = async (items: IItem[]) => {    
+  const fetchDocumentsCount = async (items: IItem[]) => {
     //filter on the items with a folder:
     const filtered = items.filter((item, idx)=> item.docFolderId !== null && item.docFolderId !== -1)
     console.log('fetchDocumentsCount');
@@ -284,7 +331,7 @@ interface IReactGetItemsState {
       // console.log('docFolderId: ', docFolderId);
       const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');
       // console.log(docFolderUrl);
-      
+
       //const data = await sp.web.lists.getByTitle('Docs').items.select('Id','Title','ItemChildCount').getById(docFolderId).get();
       //console.log(data);
 
@@ -293,7 +340,7 @@ interface IReactGetItemsState {
         // console.log('item');
         // console.log(item);
       });
-      
+
       sp.web.getFolderByServerRelativeUrl(docFolderUrl)
       .select('ID','ItemChildCount','ItemCount')
       .get().then(function(data) {
@@ -303,8 +350,8 @@ interface IReactGetItemsState {
         const nextState = items.map(a => a.id === item.id ? { ...a, docCount: data.ItemCount } : a);
         setItems(nextState);
         console.log(nextState[0]);
-      }); // why is the state being reset?  is it not fast enough?  if the next item, then return the firstItem as is - add the whole item to the state!    
-    }    
+      }); // why is the state being reset?  is it not fast enough?  if the next item, then return the firstItem as is - add the whole item to the state!
+    }
   }
 
 const updItem = await sp.web.lists.getByTitle('questions').items.getById(id).update({

@@ -80,8 +80,19 @@
   zbackground-color: khaki;
   display: block;
   width: 100%;
+
+  .section {
+    margin-bottom: 10px;
+    h3 {
+      font-weight: bold;
+    }
+    .highlight{
+      font-weight: bold;
+    }
+  }
   // background-color: orange;
   .container{
+    margin-left: 20px;
     display: grid;
     // grid-template-columns: 150px 50px 150px 150px 50px;
     // desc value response comments uploadDoc

@@ -2,7 +2,6 @@ import * as React from 'react';
 import styles from './Main.module.scss';
 import { IQuestionProps, IQuestionState } from './IQuestionProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-
 import { sp } from '@pnp/sp';
 import { Dropdown, DropdownMenuItemType, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
@@ -42,8 +41,8 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
 
   return(
     <React.Fragment>
-      <div className={styles.item1}>
-        {id} | {description}
+      <div className={styles.item1}>        
+        <div dangerouslySetInnerHTML={{__html: description}} />
       </div>
       <div className={styles.item2}>
         {hasValue &&
@@ -69,7 +68,7 @@ export const Question: React.FC<IQuestionProps> = ({ clickme, handleChange, hand
       <div className={styles.item4}>
         <TextField data-id={id} data-field='comments' value={comments} onChange={_valueChange} onBlur={_isDirty} multiline rows={2} autoAdjustHeight/>
       </div>
-      <div className={styles.item5}>        
+      <div className={styles.item5}>{id} | 
         {docFolderLink &&
           <Link href={docFolderLink.Url} target='_blank' data-interception='off' rel='noopener noreferrer'>upload files</Link>
         }
