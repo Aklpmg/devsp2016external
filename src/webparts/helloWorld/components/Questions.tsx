@@ -11,6 +11,8 @@ import { Question } from './Question';
 import { data } from './questionsdata';
 
 import { makeData } from './makeData';
+
+
 // import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 // import { Modal } from 'office-ui-fabric-react/lib/Modal';
 
@@ -46,22 +48,27 @@ interface Array<IItem> {
 }
 
 // the level 2s but it depends on what the L1 is  ie if level1 is Assets & Liabilities ie L1 Id
-const SectionL1 = ['Financial Information','Client Details','Assets and Liabilities','Income and Expenses','Other']
-const SectionL2_1 = ['',''];  // ordered
-const SectionL2_2 = ['',''];
-const SectionL2_3 = ['Bank','Debtors','Livestock'];
-const SectionL2_4 = ['',''];
-const SectionL2_5 = ['',''];
+const SECTION1 = ['Financial Information','Client Details','Assets and Liabilities','Income and Expenses','Other'];
+const SECTION2_1 = ['',''];  // ordered
+const SECTION2_2 = ['',''];
+const SECTION2_3 = ['Bank','Debtors','Livestock'];
+const SECTION2_4 = ['',''];
+const SECTION2_5 = ['',''];
 
 export const Questions: React.FC<IQuestionsProps> = (props) => {
   const [items, setItems] = React.useState<IItem[]>([]);
+  const [oriItems, setOriItems] = React.useState<IItem[]>([]);
 
   const selectFields: string[] = ['DocFolderID', 'Id','Title','QuestionDescription','Value','Response','Comments','SectionL1','SectionL2','SectionL3','DocFolderLink','hasValue','hasDocument'];
 
-  const fetchDocumentCount = async (docFolderLink: any) => {
+  const fetchDocumentCount = async (docFolderLink: any, id:number) => {
+    // console.log('in fetchDocumentCount x')
     const docFolderUrl = docFolderLink.Url.replace('https://sweetaz.sharepoint.com','');  // todo:
-    const dataitem = await sp.web.getFolderByServerRelativeUrl(docFolderUrl).select('ItemCount').get();
-    return dataitem.ItemCount;
+    const dataitem = await sp.web.getFolderByServerRelativeUrl(docFolderUrl).select('ItemCount').get();    
+    return {
+      id: id,
+      count: dataitem.ItemCount
+    };
   };
 
   const fetchItems = async () => {
@@ -71,13 +78,20 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     // get all the items from a sharepoint list
     const data = await sp.web.lists.getByTitle('Questions').items.select(selectFields.join(',')).get();
     // console.log(data);
+
+    // array of promises
+    let docCountPromises = [];
+
     for (const k in data) {
       const dataitem = data[k];
       let docCount = 0;
 
       // todo:
+      //  
       if (dataitem.hasDocument && dataitem.DocFolderLink !== null && dataitem.DocFolderLink.Url) {
-        docCount = await fetchDocumentCount(dataitem.DocFolderLink);
+        //let objDocCount = await fetchDocumentCount(dataitem.DocFolderLink, dataitem.Id);
+        docCountPromises.push(fetchDocumentCount(dataitem.DocFolderLink, dataitem.Id));
+        //console.log(objDocCount);
       }
 
       // sanitize the html from the description field first
@@ -105,8 +119,24 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
         isDirty: false
       });
     }
-    console.log(items);
-    setItems(items);
+
+    setOriItems([...items]);
+
+    console.log('getPromises:')
+    console.log(docCountPromises.length);
+
+    await Promise.all(docCountPromises).then(docCountData => {
+      console.log('got All Promises:');
+      console.log(docCountData);
+
+      const len = docCountData.length;
+      for(let i = 0; i < len; i++) {
+        let docCountItem = docCountData[i];
+        items.find(item => item.id === docCountItem.id).docCount = docCountItem.count;
+      }
+      console.log(items);
+      setItems(items);
+    });
   };
 
   const findItem = (id: number) => {
@@ -208,7 +238,17 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
     //    loop - async, concurrent? update
     const filtered = items.filter((item, idx) => item.isDirty);
     console.log(filtered);
-    await saveItems(filtered);
+    //await saveItems(filtered);
+
+    var edited = items.filter(function (o1) {
+      return oriItems.some(function (o2) {
+          return o1.id === o2.id && (o1.response !== o2.response || o1.value !== o2.value || o1.comments !== o2.comments ); // return the ones with equal id
+     });
+    });
+    console.log('Changed:')
+    console.log(edited);
+    await saveItems(edited);
+    alert('saved');
   };
 
   // Sections - foreaqch Section, get the list of questions and display under a Heading - do the questions need a sectionLevel id value?
@@ -219,19 +259,19 @@ export const Questions: React.FC<IQuestionsProps> = (props) => {
 
   const questionComponent = (item: IItem) => {
     return
-    <Question handleChange={handleValueChange} handleDropdownChange={handleDropdownChange} handleIsDirty={handleIsDirty} clickme={clickme}
-    key={item.id} id={item.id} title={item.title} description={item.description}
-    value={item.value} comments={item.comments} response={item.response}
-    docCount={item.docCount} docFolderLink={item.docFolderLink}
-    hasValue={item.hasValue} hasDocument={item.hasDocument}>
-    </Question>;
+      <Question handleChange={handleValueChange} handleDropdownChange={handleDropdownChange} handleIsDirty={handleIsDirty} clickme={clickme}
+      key={item.id} id={item.id} title={item.title} description={item.description}
+      value={item.value} comments={item.comments} response={item.response}
+      docCount={item.docCount} docFolderLink={item.docFolderLink}
+      hasValue={item.hasValue} hasDocument={item.hasDocument}>
+      </Question>;
   };
 
   return(
     <div className={styles.questions}>
        <DefaultButton text='Save' onClick={handleSave}/>
         <button onClick={clickme}>clickme</button>
-        {SectionL2_3.map(sectionl2 => (
+        {SECTION2_3.map(sectionl2 => (
           <div className={styles.section}>
             <h3>{sectionl2}</h3>
             <div className={styles.highlight}> Please provide us with the following </div>
